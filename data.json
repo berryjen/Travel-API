@@ -1,0 +1,66 @@
+{
+    "countries": [
+      {
+        "name": "Spain",
+        "official-languages": 5,
+        "ethnic-groups": [
+          {
+            "name": "Spainards",
+            "percentage": 84.8
+          },
+          {
+            "name": "Others",
+            "percentage": 15.2
+          }
+        ],
+        "cities":[
+          {
+           "name": "Madrid",
+           "country": "Spain",
+           "visited": false,
+           "population":300000,
+           "would-visit-again": null
+          },
+          {
+            "name": "San Sebastian",
+            "country": "Spain",
+            "visited": true,
+            "population": 15000,
+            "would-visit-again": true
+          }
+        ]
+      },
+      {
+        "name": "Croatia",
+        "official languages": 1,
+        "ethinic groups": [
+          {  "name": "Croats",
+             "percentage": 90.42
+          },
+          {  "name": "Serbs",
+             "percentage": 4.36
+          },
+          {  "name": "Others",
+             "percentage": 5.22
+          }
+          
+        ],
+        "cities": [
+          {
+            "name": "Zagreb",
+            "country": "Croatia",
+            "visited": true,
+            "population": 100000,
+            "would-visit-again": false
+          },
+          {
+            "name": "Split",
+            "country": "croatia",
+            "visited": true,
+            "population": 100000,
+            "would-visit-again": true
+          }
+        ]
+      }
+    ]
+}

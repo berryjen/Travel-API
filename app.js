@@ -1,210 +1,53 @@
 const express = require('express')
+const fs = require('fs')
 const app = express()
 const port = 3000
 
-app.get('/array', (req, res) => {
-  res.json ([{
-    name: "country 1",
-    visited: true,
-  },
-  {
-    name: "country 2",
-    visited: false,
-  },
-  {
-    name: "country 3",
-    visited: true,
-  }
-  ]);
-});
+//file reading begins
+var world= {}
+try {
+  const data = fs.readFileSync('./data.json');
+  world = JSON.parse(data);
+}
+
+catch (err) {
+  console.log(`Error reading file from disk: ${err}`);
+}
 
 /* 
 /  : responds with list of all countries in the world
 /country: list of cities within the country object
 /country/city: responds with city object with "visited" property included
 create mental data structure on separate file
+create a new function that returns city
 */
-app.get("/", (req, res) => {
-  res.json ([{
-      country: "Spain",
-      },
-      {
-      country: "Nicaragua",
-      },
-      {
-      country: "Chile",
-      },
-      {
-      country: "Croatia",
-      },
-      {
-      country: "Colombia",
-      },
-      {
-      country: "Argentina",
-      },
-      {
-      country: "Morocco",
-      },
-      {
-      country: "Japan",
-      },
-      {
-      country: "Turkey",
-      },
-      {
-      country: "Australia",
-    }
-  ]);
-});  
-
-app.get('/country', (req, res) => {
-   res.json([{
-     country: "Spain",
-   },
-   {
-     city: "San Sebastian",
-   },
-   {
-     city: "Barcelona",
-   },
-   {
-     city: "Cordoba",
-   },
-   {
-     city: "Granada",
-   },
-   {
-     city: "Nerja",
-   },
-   {
-     city: "Seville",
-   },
-   {
-     city: "Malaga",
-   },
-   {
-     city: "Marbella",
-   },
-   {
-     city: "Mallorca"
-   },
-   {
-     country: "Nicaragua",
-   },
-   {
-   city: "Leon",
-   },
-   {
-    city: "San Juan del Sur",
-   },
-   {
-     country: "Chile",
-   },
-   {
-     city: "none",
-   },
-   {
-     country: "Croatia",
-   },
-   {
-     city: "Rijeka",
-   },
-   {
-     city: "Novalija",
-   },
-   {
-     city: "Zadar",
-   },
-   {
-     city: "Sibenik",
-   },
-   {
-     city: "Split",
-   },
-   {
-     city: "Makarska",
-   },
-   {
-     city: "Dubrovnik",
-   },
-   {
-     country: "Colombia",
-     city: "none",
-   },
-   {
-     country: "Argentia",
-     city: "none",
-   },
-   {
-     country: "Morocco",
-   },
-   {
-     city: "Fes",
-   },
-   {
-     city: "Rabat",
-   },
-   {
-     city: "Merzouga",
-   },
-   {
-     city: "Marrakech",
-   },
-   {
-     country: "Japan",
-   },
-   {
-     city: "Tokyo",
-   },
-   {
-     city: "Osaka",
-   },
-   {
-     city: "Kyoto",
-   },
-   {
-     city: "Kumayama",
-   },
-   {
-     country: "Turkey",
-   },
-   {
-     city: "none",
-   },
-   {
-     country: "Australia",
-   },
-   {
-     city: "none",
-   }
-  ]);
+var city = 
+app.get('/', (req, res) => {
+  res.json(world)
 });
 
-app.get('/country/city', (req, res) => {
+
+app.get('/:country', (req, res) => {
+  var result = world.countries.find(obj => {
+   return obj.name === req.params.country
+  })
+   res.json(result)
+});
+
+app.get('/:country/:city', (req, res) => {
    res.json({
-     name: "Madrid",
-     visited: false,
-     name: "Barcelona",
-     visited: true,
-     name: "Chefchaouen",
-     visited: false,
-     name: "Makarska",
-     visited: true,
-     name: " Santiego",
-     visited: false,
-     name: "Buenos Aires",
-     visited: false,
-     name: "Okinawa",
-     visited: false,
-   });
+    "name": req.params.city,
+    "country": req.params.country,
+    "visited": true,
+    "population": 100000
+   })
 });
 
 app.get('/uk', (req, res) => {
    res.json({
      name: "England",
      visited: true
-   });
+   })
 });
 
 app.get("/hello", (req, res) => {
@@ -219,4 +62,3 @@ app.listen(port, () =>
 {
   console.log(`Example app listening on port ${port}`)
 })
-
