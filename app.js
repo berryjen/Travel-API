@@ -20,8 +20,14 @@ catch (err) {
 /country/city: responds with city object with "visited" property included
 create mental data structure on separate file
 create a new function that returns city
+within /:country/:city, create a return that will display correct status code
+ie) part 1) 404 country not found
+res._____
+part 2) return 404 city not found
+gave a blank page (when the city hasnt been populated in the database)
 */
-var city = 
+
+
 app.get('/', (req, res) => {
   res.json(world)
 });
@@ -29,18 +35,23 @@ app.get('/', (req, res) => {
 
 app.get('/:country', (req, res) => {
   var result = world.countries.find(obj => {
-   return obj.name === req.params.country
+    return obj.name === req.params.country
   })
-   res.json(result)
+  res.json(result)
 });
 
 app.get('/:country/:city', (req, res) => {
-   res.json({
-    "name": req.params.city,
-    "country": req.params.country,
-    "visited": true,
-    "population": 100000
-   })
+  var result = world.countries.find(obj => {
+    return obj.name === req.params.country
+  })
+  if (result === undefined ){
+    res.send ("country not found")
+    return 
+  }
+  var city = result.cities.find(obj => {
+    return obj.name === req.params.city
+  })
+  res.json(city)
 });
 
 app.get('/uk', (req, res) => {
