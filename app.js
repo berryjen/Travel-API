@@ -45,12 +45,16 @@ app.get('/:country/:city', (req, res) => {
     return obj.name === req.params.country
   })
   if (result === undefined ){
-    res.send ("country not found")
+    res.status(404).sendFile("/absolute/path/to/404.png")
     return 
   }
   var city = result.cities.find(obj => {
     return obj.name === req.params.city
   })
+  if (city === undefined){
+    res.status(404).sendFile("/absolute/path/to/404.png")
+    return 
+  }
   res.json(city)
 });
 
