@@ -18,14 +18,14 @@
            "name": "Madrid",
            "country": "Spain",
            "visited": false,
-           "population":300000,
+           "population":6713557,
            "would-visit-again": null
           },
           {
             "name": "San Sebastian",
             "country": "Spain",
             "visited": true,
-            "population": 15000,
+            "population": 188102,
             "would-visit-again": true
           }
         ]
@@ -50,14 +50,14 @@
             "name": "Zagreb",
             "country": "Croatia",
             "visited": true,
-            "population": 100000,
+            "population": 769944,
             "would-visit-again": false
           },
           {
             "name": "Split",
             "country": "croatia",
             "visited": true,
-            "population": 100000,
+            "population": 161312,
             "would-visit-again": true
           }
         ]
