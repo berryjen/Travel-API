@@ -15,9 +15,9 @@ CREATE TABLE countries (
 );
 INSERT INTO countries (country, visited, would_visit) VALUES ('Spain', true, true); 
 INSERT INTO countries (country, visited, would_visit) VALUES ('Croatia', true, true);
-INSERT INTO countries (country, visited, would_visit) VALUES ('Saudi Arabia', false, false);
-INSERT INTO countries (country, visited, would_visit) VALUES ('North Korea', false, false);
-INSERT INTO countries (country, visited, would_visit) VALUES ('Peru', false, true);
+INSERT INTO countries (country, would_visit) VALUES ('Saudi Arabia', false);
+INSERT INTO countries (country, would_visit) VALUES ('North Korea', false);
+INSERT INTO countries (country, would_visit) VALUES ('Peru', true);
 INSERT INTO countries (country, visited, would_visit) VALUES ('Portugal', true, true);
 INSERT INTO countries (country, visited, would_visit) VALUES ('Germany', true, true);
 
@@ -26,14 +26,15 @@ CREATE TABLE cities (
   city TEXT,
   country TEXT,
   visited BOOLEAN DEFAULT false,
-  would_visit BOOLEAN
+  would_visit BOOLEAN,
+  blacklist BOOLEAN DEFAULT false
   );
   INSERT INTO cities (city, country, visited, would_visit) VALUES ('Madrid', 'Spain',false, null);
   INSERT INTO cities (city, country, visited, would_visit) VALUES ('San Sebastian', 'Spain', true, true);
   INSERT INTO cities (city, country, visited, would_visit) VALUES ('Zagreb', 'Croatia', true, false);
   INSERT INTO cities (city, country, visited, would_visit) VALUES ('Split', 'Croatia', true, true);
-  INSERT INTO cities (city, country, would_visit) VALUES ('Riyadh', 'Saudi Arabia', false);
-  INSERT INTO cities (city, country, would_visit) VALUES ('Pyongyang', 'North Korea', false);
+  INSERT INTO cities (city, country, would_visit, blacklist) VALUES ('Riyadh', 'Saudi Arabia', false, true);
+  INSERT INTO cities (city, country, would_visit, blacklist) VALUES ('Pyongyang', 'North Korea', false, true);
   INSERT INTO cities (city, country, would_visit) VALUES ('Lima', 'Peru', true);
   INSERT INTO cities (city, country, visited, would_visit) VALUES ('Lisbon', 'Portugal', true, true);
   INSERT INTO cities (city, country, would_visit) VALUES ('Nazare', 'Portugal', true);
@@ -50,3 +51,22 @@ JOIN countries ON countries.country = cities.country
 WHERE cities.visited = false
 AND countries.visited = true
 AND countries.would_visit= true;
+
+SELECT visited,
+  100* COUNT(country) / (SELECT COUNT(country) FROM countries) AS 'percentage' 
+FROM countries
+WHERE visited = true
+GROUP BY visited;
+  
+SELECT *
+FROM cities
+  WHERE visited= false
+    AND blacklist= false
+  ORDER BY RANDOM()
+  LIMIT 1;
+
+SELECT *
+FROM cities;
+
+SELECT * 
+FROM countries;
