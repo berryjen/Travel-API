@@ -6,10 +6,12 @@
 -- (aggregation) write a query that will return the % of the countries I've been to
    -- part 2) (limit) return the % of the cities in a country I've been to (ie: % of citieis in England visited)
 -- (random) return a city to visit next (but not one where i've visited already)
-
+-- remove countries column from cities table 
+-- re name the join query 
 DROP TABLE IF EXISTS countries;
 CREATE TABLE countries (
-  country TEXT PRIMARY KEY,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  country TEXT NOT NULL UNIQUE,
   visited BOOLEAN DEFAULT false,
   would_visit BOOLEAN
 );
@@ -23,8 +25,10 @@ INSERT INTO countries (country, visited, would_visit) VALUES ('Germany', true, t
 
 DROP TABLE IF EXISTS cities;
 CREATE TABLE cities (
-  city TEXT,
-  country TEXT,
+  id INTEGER PRIMARY KEY AUTOINCREMENT,
+  city TEXT NOT NULL,
+  country_id INTEGER,
+  country TEXT NOT NULL,
   visited BOOLEAN DEFAULT false,
   would_visit BOOLEAN,
   blacklist BOOLEAN DEFAULT false
@@ -70,3 +74,19 @@ FROM cities;
 
 SELECT * 
 FROM countries;
+
+SELECT cities.id, cities.city, cities.country_id, countries.country, countries.id AS country_id
+FROM cities
+JOIN countries ON countries.country = cities.country
+WHERE cities.visited = false;
+
+UPDATE
+	cities
+SET
+	country_id = (
+		SELECT
+			id
+		FROM
+			countries
+		WHERE
+			cities.country = countries.country);
