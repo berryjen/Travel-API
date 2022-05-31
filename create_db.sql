@@ -28,21 +28,20 @@ CREATE TABLE cities (
   id INTEGER PRIMARY KEY AUTOINCREMENT,
   city TEXT NOT NULL,
   country_id INTEGER,
-  country TEXT NOT NULL,
   visited BOOLEAN DEFAULT false,
   would_visit BOOLEAN,
   blacklist BOOLEAN DEFAULT false
   );
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('Madrid', 'Spain',false, null);
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('San Sebastian', 'Spain', true, true);
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('Zagreb', 'Croatia', true, false);
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('Split', 'Croatia', true, true);
-  INSERT INTO cities (city, country, would_visit, blacklist) VALUES ('Riyadh', 'Saudi Arabia', false, true);
-  INSERT INTO cities (city, country, would_visit, blacklist) VALUES ('Pyongyang', 'North Korea', false, true);
-  INSERT INTO cities (city, country, would_visit) VALUES ('Lima', 'Peru', true);
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('Lisbon', 'Portugal', true, true);
-  INSERT INTO cities (city, country, would_visit) VALUES ('Nazare', 'Portugal', true);
-  INSERT INTO cities (city, country, visited, would_visit) VALUES ('Berlin', 'Germany', true, false);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('Madrid',false, null);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('San Sebastian', true, true);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('Zagreb', true, false);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('Split', true, true);
+  INSERT INTO cities (city, would_visit, blacklist) VALUES ('Riyadh',false, true);
+  INSERT INTO cities (city, would_visit, blacklist) VALUES ('Pyongyang', false, true);
+  INSERT INTO cities (city, would_visit) VALUES ('Lima', true);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('Lisbon', true, true);
+  INSERT INTO cities (city, would_visit) VALUES ('Nazare', true);
+  INSERT INTO cities (city, visited, would_visit) VALUES ('Berlin', true, false);
 
 SELECT *
 FROM cities
@@ -51,10 +50,10 @@ WHERE visited = false
 
 SELECT *
 FROM cities
-JOIN countries ON countries.country = cities.country
+JOIN cities.country_id = countries.id
 WHERE cities.visited = false
 AND countries.visited = true
-AND countries.would_visit= true;
+AND countries.would_visit = true;
 
 SELECT visited,
   100* COUNT(country) / (SELECT COUNT(country) FROM countries) AS 'percentage' 
@@ -77,7 +76,7 @@ FROM countries;
 
 SELECT cities.id, cities.city, cities.country_id, countries.country, countries.id AS country_id
 FROM cities
-JOIN countries ON countries.country = cities.country
+JOIN cities.country_id = countries.id
 WHERE cities.visited = false;
 
 UPDATE
@@ -89,4 +88,4 @@ SET
 		FROM
 			countries
 		WHERE
-			cities.country = countries.country);
+			cities.country_id = countries.id);

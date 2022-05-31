@@ -1,0 +1,8 @@
+-- create column entries identical to the country csv file 
+-- import data from country csv file (import from table plus literally right click & import)
+-- create column entries identical to the cities csv file 
+-- import data from cities csv file
+-- create cities table
+--create countries table
+-- write query to copy data from imported over to the desired countries table format
+-- write query to copy data from imported over to the desired cities table format
