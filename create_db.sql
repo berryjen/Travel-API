@@ -50,7 +50,7 @@ WHERE visited = false
 
 SELECT *
 FROM cities
-JOIN cities.country_id = countries.id
+INNER JOIN countries ON cities.country_id= countries.id
 WHERE cities.visited = false
 AND countries.visited = true
 AND countries.would_visit = true;
@@ -76,8 +76,8 @@ FROM countries;
 
 SELECT cities.id, cities.city, cities.country_id, countries.country, countries.id AS country_id
 FROM cities
-JOIN cities.country_id = countries.id
-WHERE cities.visited = false;
+  INNER JOIN countries ON cities.country_id= countries.id
+  WHERE cities.visited = false;
 
 UPDATE
 	cities
@@ -88,4 +88,5 @@ SET
 		FROM
 			countries
 		WHERE
-			cities.country_id = countries.id);
+			cities.country_id = countries.id
+      );
