@@ -76,7 +76,7 @@ FROM countries;
 
 SELECT cities.id, cities.city, cities.country_id, countries.country, countries.id AS country_id
 FROM cities
-  INNER JOIN countries ON cities.country_id= countries.id
+  cities.country_id= countries.id
   WHERE cities.visited = false;
 
 UPDATE
