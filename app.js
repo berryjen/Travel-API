@@ -2,6 +2,8 @@ const express = require('express')
 const fs = require('fs')
 const app = express()
 const port = 3000
+const sqlite3 = require('sqlite3').verbose()
+const db = new sqlite3.Database('lorem.db')
 
 //file reading begins
 var world= {}
@@ -29,7 +31,17 @@ gave a blank page (when the city hasnt been populated in the database)
 
 
 app.get('/', (req, res) => {
-  res.json(world)
+  db.all('SELECT country FROM countries',
+    function(err, rows) {
+      if (err) {
+          console.log(err)
+          res.status(500).send("An error occured here")
+         }
+         else {
+          res.json(rows)
+         }
+    } 
+  )
 });
 
 
