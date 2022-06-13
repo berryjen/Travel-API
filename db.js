@@ -22,7 +22,7 @@ db.serialize(() => {
   /*db.each('SELECT rowid AS id, info FROM lorem', (err, row) => {
     console.log(`${row.id}: ${row.info}`)
   }) */
-  /*db.each('SELECT country FROM countries',
+  db.each('SELECT country FROM countries',
     function(err, row) {
       console.log(`${row.country}`)
     } 
@@ -31,7 +31,7 @@ db.serialize(() => {
     (err, row) => {
       console.log(`${row.city}`)
     }
-  ) */
+  ) 
     /* db.each('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ?', requested_country, 
     (err, row) => {
          if (err) {
