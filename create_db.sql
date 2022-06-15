@@ -90,3 +90,12 @@ SET
 		WHERE
 			cities.country_id = countries.id
       );
+
+CREATE UNIQUE INDEX idx_countries_country
+ON countries (country);	
+
+CREATE INDEX idx_cities_city
+ON cities (city);	
+
+CREATE INDEX idx_cites_country_id
+ON cities (country_id);	
