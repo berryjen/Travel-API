@@ -47,18 +47,42 @@ post request allows for updates.
   --> user puts in an update request
   --> app.post talks to database and asks it to update
 
+implement additional SELECT quires to handle combinations of query string params 
+--> ex) query = 'SELECT country FROM countries WHERE visited = true & would_visit = true'
+create new app.post('/:country/visited)
+--> what is the json obj going to be sent?
 */
+app.use(express.json())
 
+app.get('/drink', (req, res) => {
+  console.log(req.query.temperature)
+  res.send('Here is your ' + req.query.temperature + ' drink')
+});
+
+app.post('/drink', (req, res) => {
+  console.log(req.body.type)
+  res.send('Thank you for the ' + req.body.type )
+});
 
 app.get('/', (req, res) => {
-  db.all('SELECT country FROM countries',
+  var query = 'SELECT country FROM countries'
+  if (req.query.visited === 'true') {
+    query = 'SELECT country FROM countries WHERE visited = true'
+  }
+  else if (req.query.visited === 'false') {
+    query = 'SELECT country FROM countries WHERE visited = false'
+  }  
+  
+  console.log (query)
+
+  db.all(query, 
     function(err, rows) {
       if (err) {
         console.log(err)
         res.status(500).send("An error occurred here")
       }
-      else if (rows.lenght === 0) {
-        res.status(404).send("Country not found")
+      else if (rows.lenghth === 0) {
+        res.status(404).send("Countries not found")
       }
       else {
         res.json(rows)
@@ -86,7 +110,7 @@ app.get('/:country', (req, res) => {
   ) 
 }); 
 
-app.get('/:country/:city', (req, res) => {
+/* app.get('/:country/:city', (req, res) => {
   db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
     (err, rows) => {
       if(err) {
@@ -101,9 +125,9 @@ app.get('/:country/:city', (req, res) => {
       }
     }    
   ) 
-});
+}); */
 
-app.get('/:country/:city/info', (req, res) => {
+app.get('/:country/:city', (req, res) => {
   db.all('SELECT city AS name, country, cities.visited, cities.would_visit, cities.blacklist FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
     (err, rows) => {
       if(err) {
@@ -119,10 +143,6 @@ app.get('/:country/:city/info', (req, res) => {
     }    
   ) 
 });
-
-app.post('/:country/:city', (req, res) => {
-}
-
 
 app.get('/uk', (req, res) => {
    res.json({
