@@ -49,8 +49,11 @@ post request allows for updates.
 
 implement additional SELECT quires to handle combinations of query string params 
 --> ex) query = 'SELECT country FROM countries WHERE visited = true & would_visit = true'
-create new app.post('/:country/visited)
+create new app.post('/:country/visited')
 --> what is the json obj going to be sent?
+
+concatenate blacklist to the query string
+debug why the result shows empty array
 */
 app.use(express.json())
 
@@ -65,13 +68,20 @@ app.post('/drink', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  var query = 'SELECT country FROM countries'
+  var visited_query = 'false'
   if (req.query.visited === 'true') {
-    query = 'SELECT country FROM countries WHERE visited = true'
+    visited_query = 'true'
   }
-  else if (req.query.visited === 'false') {
-    query = 'SELECT country FROM countries WHERE visited = false'
-  }  
+  var would_visit_query = 'false' 
+  if (req.query.would_visit === 'true') {
+    would_visit_query = 'true'
+  }
+  var blacklisted_query = 'false'
+  if (req.query.blacklist === 'true') {
+    blacklisted_query = 'true'
+  }
+  
+  query = 'SELECT country FROM countries WHERE visited = ' + visited_query + ' & would_visit = ' + would_visit_query + ' & blacklist = ' + blacklisted_query
   
   console.log (query)
 
@@ -109,6 +119,11 @@ app.get('/:country', (req, res) => {
     }    
   ) 
 }); 
+
+app.post('/:country/visited', (req,res) => {
+  var query_city = 'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE visited = ?'
+}
+)
 
 /* app.get('/:country/:city', (req, res) => {
   db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
