@@ -54,6 +54,17 @@ create new app.post('/:country/visited')
 
 concatenate blacklist to the query string
 debug why the result shows empty array
+
+consolidate IF & query string parameter filters to app.get('/:country')
+--> apply visited, would_visit to the list of cities
+app.post
+--> to not manually update info on the database
+--> have the function do the work
+error handling for app.get('/')
+--> for unexpected values
+--> which error code to return
+ex) ?visited=France 
+
 */
 app.use(express.json())
 
@@ -68,20 +79,31 @@ app.post('/drink', (req, res) => {
 });
 
 app.get('/', (req, res) => {
-  var visited_query = 'false'
+  var visited_query = 'NOT NULL'
   if (req.query.visited === 'true') {
     visited_query = 'true'
   }
-  var would_visit_query = 'false' 
+  else if (req.query.visited === 'false') {
+    visited_query = 'false'
+  }
+
+  var would_visit_query = 'NULL OR would_visit IS NOT NULL' 
   if (req.query.would_visit === 'true') {
     would_visit_query = 'true'
   }
-  var blacklisted_query = 'false'
-  if (req.query.blacklist === 'true') {
-    blacklisted_query = 'true'
+  else if (req.query.would_visit === 'false') {
+    would_visit_query = 'false'
   }
   
-  query = 'SELECT country FROM countries WHERE visited = ' + visited_query + ' & would_visit = ' + would_visit_query + ' & blacklist = ' + blacklisted_query
+  var blacklisted_query = 'NOT NULL'
+  if (req.query.blacklisted === 'true') {
+    blacklisted_query = 'true'
+  }
+  else if (req.query.blacklisted === 'false') {
+    blacklisted_query = 'false'
+  }
+
+  query = 'SELECT country FROM countries WHERE visited IS ' + visited_query + ' AND (would_visit IS ' + would_visit_query + ') AND blacklisted IS ' + blacklisted_query
   
   console.log (query)
 

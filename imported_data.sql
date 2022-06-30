@@ -30,6 +30,9 @@ CREATE TABLE countries (
   would_visit BOOLEAN
 );
 
+ALTER TABLE "countries" 
+  ADD COLUMN "blacklisted" Boolean DEFAULT false;
+
 INSERT INTO countries (country)
   SELECT country
   FROM countries_import;
@@ -40,11 +43,19 @@ DROP TABLE IF EXISTS cities;
   city TEXT NOT NULL,
   country_id INTEGER,
   visited BOOLEAN DEFAULT false,
-  would_visit BOOLEAN,
-  blacklist BOOLEAN DEFAULT false
+  would_visit BOOLEAN
   );
 
 INSERT INTO cities (city, country_id)
   SELECT accent_city, countries.id
   FROM cities_import
   JOIN countries ON countries.country = cities_import.country;
+
+CREATE UNIQUE INDEX idx_countries_country
+ON countries (country);	
+
+CREATE INDEX idx_cities_city
+ON cities (city);	
+
+CREATE INDEX idx_cites_country_id
+ON cities (country_id);	
