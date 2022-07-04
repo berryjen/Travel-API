@@ -3,7 +3,7 @@ const fs = require('fs')
 const app = express()
 const port = 3000
 const sqlite3 = require('sqlite3').verbose()
-const db = new sqlite3.Database('lorem.db')
+const db = new sqlite3.Database('world.db')
 const requested_country = 'Portugal'
 
 //file reading begins
@@ -73,7 +73,7 @@ app.get('/drink', (req, res) => {
   res.send('Here is your ' + req.query.temperature + ' drink')
 });
 
-app.post('/drink', (req, res) => {
+/* app.post('/drink', (req, res) => {
   console.log(req.body.type)
   res.send('Thank you for the ' + req.body.type )
 });
@@ -105,7 +105,7 @@ app.get('/', (req, res) => {
 
   query = 'SELECT country FROM countries WHERE visited IS ' + visited_query + ' AND (would_visit IS ' + would_visit_query + ') AND blacklisted IS ' + blacklisted_query
   
-  console.log (query)
+  console.log(query)
 
   db.all(query, 
     function(err, rows) {
@@ -122,30 +122,44 @@ app.get('/', (req, res) => {
       }     
     } 
   )
-});
-
+}); */
 
 app.get('/:country', (req, res) => {
-  db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ?', req.params.country, 
+  /* TODO: check if country actually exists 
+          check if country is blacklisted */
+  
+  var visited_city_query = 'NOT NULL'
+  if (req.query.visited === 'true') {
+    visited_city_query = 'true'
+  }
+  else if (req.query.visited === 'false') {
+    visited_city_query = 'false'
+  }
+
+  var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL' 
+  if (req.query.would_visit === 'true') {
+    would_visit_city_query = 'true'
+  }
+  else if (req.query.would_visit === 'false') {
+    would_visit_city_query = 'false'
+  }
+
+  city_query = 'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' + visited_city_query + ' AND ( cities.would_visit IS ' + would_visit_city_query + ')'
+  
+  console.log(city_query)
+  
+  db.all(city_query, req.params.country,
     (err, rows) => {
       if(err) {
         console.log(err)
         res.status(500).send("An error occurred here")
       }
-      else if (rows.length === 0) {
-        res.status(404).send("Country not found")
-      }
       else {
         res.json(rows)
       }
     }    
-  ) 
+  )
 }); 
-
-app.post('/:country/visited', (req,res) => {
-  var query_city = 'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE visited = ?'
-}
-)
 
 /* app.get('/:country/:city', (req, res) => {
   db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
@@ -165,20 +179,75 @@ app.post('/:country/visited', (req,res) => {
 }); */
 
 app.get('/:country/:city', (req, res) => {
-  db.all('SELECT city AS name, country, cities.visited, cities.would_visit, cities.blacklist FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
+  /* TODO: check if country actually exists 
+          check if country is blacklisted */
+  db.all('SELECT city AS name, country, cities.visited, cities.would_visit FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
     (err, rows) => {
       if(err) {
         console.log(err)
         res.status(500).send("An error occurred here")
       }
       else if (rows.length === 0) {
-        res.status(404).send("Country not found")
+        res.status(404).send("City not found")
       }
       else {
         res.json(rows)
       }
     }    
   ) 
+});
+
+app.patch('/:country', (req,res) => {
+  /* TODO: validate all values in request.body
+  how to check if a property exists in JS
+  // IF var_req.body.vsited === true
+  // then var_req = true
+  if var_req === 
+  // how to reason about the situation where user input provided is only partial?
+  // --> support or don't support
+  function abstraction
+  */
+  if (condition) {
+    
+  } 
+  else {
+    
+  }
+  console.log(req.params.country, req.body)
+  
+  var visited = true 
+  if (req.body.visited === undefined) {
+    res.status(400).send("invalid input")
+    return
+  }
+  else if (req.body.visited === true) {
+    visited = true
+  }
+  else if (req.body.visited === false) {
+    visited = false
+  }
+  else {
+    res.status(400).send("invalid input")
+    return
+  }
+
+  query = 'UPDATE countries SET visited = ?, would_visit = ?, blacklisted = ? WHERE country = ?'
+  db.run(query, visited, req.body.would_visit, req.body.blacklisted, req.params.country, 
+    (err) => {
+         if (err) {
+          console.log(err)
+          res.status(500).send("update unsuccessful")
+         }
+         else {
+          res.status(202).send("accepted")
+         }
+    }
+    );
+});
+
+app.patch('/:country/:city', (req,res) => {
+  console.log(req.body)
+  res.status(202).send("accpeted")
 });
 
 app.get('/uk', (req, res) => {
