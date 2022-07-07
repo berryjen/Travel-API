@@ -73,7 +73,7 @@ app.get('/drink', (req, res) => {
   res.send('Here is your ' + req.query.temperature + ' drink')
 });
 
-/* app.post('/drink', (req, res) => {
+ app.post('/drink', (req, res) => {
   console.log(req.body.type)
   res.send('Thank you for the ' + req.body.type )
 });
@@ -122,7 +122,7 @@ app.get('/', (req, res) => {
       }     
     } 
   )
-}); */
+}); 
 
 app.get('/:country', (req, res) => {
   /* TODO: check if country actually exists 
@@ -200,39 +200,38 @@ app.get('/:country/:city', (req, res) => {
 app.patch('/:country', (req,res) => {
   /* TODO: validate all values in request.body
   how to check if a property exists in JS
-  // IF var_req.body.vsited === true
-  // then var_req = true
-  if var_req === 
-  // how to reason about the situation where user input provided is only partial?
-  // --> support or don't support
+  how to reason about the situation where user input provided is only partial?
+  --> support or don't support
   function abstraction
   */
-  if (condition) {
-    
-  } 
-  else {
-    
-  }
+  
   console.log(req.params.country, req.body)
   
-  var visited = true 
-  if (req.body.visited === undefined) {
-    res.status(400).send("invalid input")
-    return
+  var boolean_errors = []
+  var visited = validate_boolean(req.body.visited)
+  if (visited === undefined) {
+    boolean_errors.push("visited (required, boolean)")
   }
-  else if (req.body.visited === true) {
-    visited = true
+
+  var blacklisted = validate_boolean(req.body.blacklisted)
+  if (blacklisted === undefined) {
+    boolean_errors.push("blacklisted (required, boolean)")
   }
-  else if (req.body.visited === false) {
-    visited = false
+
+  var would_visit = validate_boolean(req.body.would_visit)
+  if (would_visit === undefined) {
+    boolean_errors.push("would_visit (required, boolean)")
   }
-  else {
-    res.status(400).send("invalid input")
+
+  if (boolean_errors.length > 0) {
+    res.status(400).send('Validation failed : ' + boolean_errors.join(', '))
     return
   }
 
+  //TODO: how & what to validate about country
+
   query = 'UPDATE countries SET visited = ?, would_visit = ?, blacklisted = ? WHERE country = ?'
-  db.run(query, visited, req.body.would_visit, req.body.blacklisted, req.params.country, 
+  db.run(query, visited, would_visit, blacklisted, req.params.country, 
     (err) => {
          if (err) {
           console.log(err)
@@ -246,10 +245,39 @@ app.patch('/:country', (req,res) => {
 });
 
 app.patch('/:country/:city', (req,res) => {
-  console.log(req.body)
-  res.status(202).send("accpeted")
-});
+  console.log(req.params.country, req.params.city, req.body)
+  
+  var boolean_errors = []
+  var visited = validate_boolean(req.body.visited)
+  if (visited === undefined) {
+    boolean_errors.push("visited (required, boolean)")
+  }
+  var would_visit = validate_boolean(req.body.would_visit)
+  if (would_visit === undefined) {
+    boolean_errors.push("would_visit (required, boolean)")
+  }
 
+  if (boolean_errors.length > 0) {
+    res.status(400).send('Validation failed : ' + boolean_errors.join(', '))
+    return
+  }
+  query = 'UPDATE cities SET visited = ?, would_visit = ? WHERE cities.city = ? AND cities.country_id IN( SELECT id FROM countries WHERE country = ?);'
+  
+  console.log(query)
+
+  db.run(query, visited, would_visit, req.params.city, req.params.country,
+    (err) => {
+         if (err) {
+          console.log(err)
+          res.status(500).send("update unsuccessful")
+         }
+         else {
+          res.status(202).send("accepted")
+         }
+    }
+  );
+});
+  
 app.get('/uk', (req, res) => {
    res.json({
      name: "England",
@@ -269,3 +297,18 @@ app.listen(port, () =>
 {
   console.log(`Example app listening on port ${port}`)
 })
+
+function validate_boolean(value) {
+  if (value === undefined) {
+    return undefined
+  }
+  else if (value === true) {
+    return true
+  }
+  else if (value === false) {
+    return false
+  }
+  else {
+    return undefined
+  }
+}
