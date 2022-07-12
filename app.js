@@ -1,7 +1,6 @@
 const express = require('express')
 const fs = require('fs')
 const app = express()
-const port = 3000
 const sqlite3 = require('sqlite3').verbose()
 const db = new sqlite3.Database('world.db')
 const requested_country = 'Portugal'
@@ -293,11 +292,6 @@ app.get("/hello/:name", (req, res) => {
   res.send ("hello " + req.params.name)
 });
 
-app.listen(port, () => 
-{
-  console.log(`Example app listening on port ${port}`)
-})
-
 function validate_boolean(value) {
   if (value === undefined) {
     return undefined
@@ -312,3 +306,5 @@ function validate_boolean(value) {
     return undefined
   }
 }
+
+module.exports = app;

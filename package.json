@@ -3,9 +3,6 @@
   "version": "1.0.0",
   "description": "",
   "main": "app.js",
-  "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
-  },
   "repository": {
     "type": "git",
     "url": "git+https://github.com/berryjen/Travel-API.git"
@@ -19,5 +16,12 @@
   "dependencies": {
     "express": "^4.17.3",
     "sqlite3": "^5.0.8"
+  },
+  "devDependencies": {
+    "jest": "^28.1.2",
+    "supertest": "^6.2.4"
+  },
+  "scripts": {
+    "test": "jest"
   }
 }
