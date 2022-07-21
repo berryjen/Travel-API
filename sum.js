@@ -1,5 +1,5 @@
 
-function sum(a, b) {
+ /* function sum(a, b) {
   make_meal("dinner", function instructions() {
     console.log("step 1")
     console.log("step 2")
@@ -12,7 +12,7 @@ function sum(a, b) {
     console.log("toast bread, use spread of choice")
   }, 4)
   return a + b;
-}
+} 
 
 
 
