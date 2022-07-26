@@ -119,7 +119,79 @@ app.get('/', (req, res) => {
 	});
 });
 
-app.get('/:country', (req, res) => {
+function add(a, b) {
+	return a + b;
+}
+
+function add_more(a, b, c) {
+	d = add(a, b);
+	add(c, d);
+	return add(c, d);
+}
+function validate_city_filters(req) {
+	visited = validate_boolean(req.query.visited);
+	would_visit = validate_boolean(req.query.would_visit);
+}
+
+function validate_country_input(req) {
+	country_query = 'SELECT country from countries WHERE country = ?';
+
+	console.log(country_query);
+
+	db.all(country_query, req.params.country, (err, rows) => {
+		if (err) {
+			console.log(err);
+			res.status(500).send('An error occurred here');
+		} else if (rows.length === 0) {
+			res.status(404).json([]);
+		} else {
+			city_query =
+				'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
+				visited_city_query +
+				' AND ( cities.would_visit IS ' +
+				would_visit_city_query +
+				')';
+			console.log(city_query);
+			db.all(city_query, req.params.country, (err, rows) => {
+				if (err) {
+					console.log(err);
+					res.status(500).send('An error occurred here');
+				} else {
+					res.json(rows);
+				}
+			});
+		}
+	});
+}
+
+function retrieve_array_cities(req, res) {
+	city_query =
+		'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
+		visited_city_query +
+		' AND ( cities.would_visit IS ' +
+		would_visit_city_query +
+		')';
+	console.log(city_query);
+	db.all(city_query, req.params.country, (err, rows) => {
+		if (err) {
+			console.log(err);
+			res.status(500).send('An error occurred here');
+		} else {
+			res.json(rows);
+		}
+	});
+}
+
+async function abc(req, res) {
+	//validates city properties to be boolean
+	validate_city_filters(req);
+	//function will check if user country input exists against database
+	validate_country_input(req);
+	//retrieve an array of cities from database
+	retrieve_array_cities(req, res);
+}
+
+function my_get_function(req, res) {
 	/* TODO: check if country actually exists 
           check if country is blacklisted */
 
@@ -163,7 +235,9 @@ app.get('/:country', (req, res) => {
 			});
 		}
 	});
-});
+}
+
+app.get('/:country', abc);
 
 /* app.get('/:country/:city', (req, res) => {
   db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 

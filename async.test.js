@@ -72,4 +72,8 @@ describe('GET /:country', () => {
 		const response = await request(app).get('/Italy');
 		expect(typeof response.body.would_visit === 'boolean').toBe(true);
 	});
+	test('should respond with correctly matched country city pair', async () => {
+		const response = await request(app).get('/Italy/Rome');
+		expect(response.body.length === 1).toBe(true);
+	});
 });
