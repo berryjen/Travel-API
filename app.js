@@ -65,15 +65,15 @@ ex) ?visited=France
 */
 app.use(express.json());
 
-app.get('/drink', (req, res) => {
+/* app.get('/drink', (req, res) => {
 	console.log(req.query.temperature);
 	res.send('Here is your ' + req.query.temperature + ' drink');
-});
+}); 
 
 app.post('/drink', (req, res) => {
 	console.log(req.body.type);
 	res.send('Thank you for the ' + req.body.type);
-});
+}); */
 
 app.get('/', (req, res) => {
 	var visited_query = 'NOT NULL';
@@ -119,7 +119,7 @@ app.get('/', (req, res) => {
 	});
 });
 
-function add(a, b) {
+/* function add(a, b) {
 	return a + b;
 }
 
@@ -127,10 +127,11 @@ function add_more(a, b, c) {
 	d = add(a, b);
 	add(c, d);
 	return add(c, d);
-}
+} */
+
 function validate_city_filters(req) {
-	visited = validate_boolean(req.query.visited);
-	would_visit = validate_boolean(req.query.would_visit);
+	visited = isValidBoolean(req.query.visited);
+	would_visit = isValidBoolean(req.query.would_visit);
 }
 
 function validate_country_input(req) {
@@ -183,7 +184,7 @@ function retrieve_array_cities(req, res) {
 }
 
 async function abc(req, res) {
-	//validates city properties to be boolean
+	//validates country properties to be boolean
 	validate_city_filters(req);
 	//function will check if user country input exists against database
 	validate_country_input(req);
@@ -239,6 +240,34 @@ function my_get_function(req, res) {
 
 app.get('/:country', abc);
 
+function validate(req) {
+	return new Promise((resolve, reject) => {
+		console.log('validate request');
+		//TODO: validate visited property
+		if (req.query.visited !== undefined) {
+			validateBoolean(req.query.visited);
+		}
+		//TODO: validate would_visit
+		//TODO: validate blacklisted
+		resolve(true);
+		//can it be an empty param?
+	});
+}
+
+app.get('/v2/:country', (req, res, next) => {
+	validate(req)
+		.then((req) => {
+			console.log('database lookup');
+			//TODO: query db for /:country
+			//throw new Error('database lookup failed');
+			return { country: 'Croatia', cities: [ 'Rovinj', 'Porec' ] };
+		})
+		.then((data) => {
+			console.log('return response');
+			res.status(200).json(data);
+		})
+		.catch(next);
+});
 /* app.get('/:country/:city', (req, res) => {
   db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
     (err, rows) => {
@@ -287,17 +316,17 @@ app.patch('/:country', (req, res) => {
 	console.log(req.params.country, req.body);
 
 	var boolean_errors = [];
-	var visited = validate_boolean(req.body.visited);
+	var visited = isValidBoolean(req.body.visited);
 	if (visited === undefined) {
 		boolean_errors.push('visited (required, boolean)');
 	}
 
-	var blacklisted = validate_boolean(req.body.blacklisted);
+	var blacklisted = isValidBoolean(req.body.blacklisted);
 	if (blacklisted === undefined) {
 		boolean_errors.push('blacklisted (required, boolean)');
 	}
 
-	var would_visit = validate_boolean(req.body.would_visit);
+	var would_visit = isValidBoolean(req.body.would_visit);
 	if (would_visit === undefined) {
 		boolean_errors.push('would_visit (required, boolean)');
 	}
@@ -324,11 +353,11 @@ app.patch('/:country/:city', (req, res) => {
 	console.log(req.params.country, req.params.city, req.body);
 
 	var boolean_errors = [];
-	var visited = validate_boolean(req.body.visited);
+	var visited = isValidBoolean(req.body.visited);
 	if (visited === undefined) {
 		boolean_errors.push('visited (required, boolean)');
 	}
-	var would_visit = validate_boolean(req.body.would_visit);
+	var would_visit = isValidBoolean(req.body.would_visit);
 	if (would_visit === undefined) {
 		boolean_errors.push('would_visit (required, boolean)');
 	}
@@ -359,23 +388,22 @@ app.get('/uk', (req, res) => {
 	});
 });
 
-app.get('/hello', (req, res) => {
-	res.send('hello');
-});
-
 app.get('/hello/:name', (req, res) => {
 	res.send('hello ' + req.params.name);
 });
 
-function validate_boolean(value) {
-	if (value === undefined) {
-		return undefined;
-	} else if (value === true) {
+function isValidBoolean(value) {
+	if (value === 'true' || value === 'false') {
 		return true;
-	} else if (value === false) {
-		return false;
 	} else {
-		return undefined;
+		return false;
+	}
+}
+
+function validateBoolean(value) {
+	let isValidBoolean_result = isValidBoolean(value);
+	if (isValidBoolean_result !== true) {
+		throw new SyntaxError(`Value given is not a valid Boolean: ${value}`);
 	}
 }
 
