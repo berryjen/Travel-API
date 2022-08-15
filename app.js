@@ -65,16 +65,6 @@ ex) ?visited=France
 */
 app.use(express.json());
 
-/* app.get('/drink', (req, res) => {
-	console.log(req.query.temperature);
-	res.send('Here is your ' + req.query.temperature + ' drink');
-}); 
-
-app.post('/drink', (req, res) => {
-	console.log(req.body.type);
-	res.send('Thank you for the ' + req.body.type);
-}); */
-
 app.get('/', (req, res) => {
 	var visited_query = 'NOT NULL';
 	if (req.query.visited === 'true') {
@@ -119,171 +109,64 @@ app.get('/', (req, res) => {
 	});
 });
 
-/* function add(a, b) {
-	return a + b;
-}
-
-function add_more(a, b, c) {
-	d = add(a, b);
-	add(c, d);
-	return add(c, d);
-} */
-
-function validate_city_filters(req) {
-	visited = isValidBoolean(req.query.visited);
-	would_visit = isValidBoolean(req.query.would_visit);
-}
-
-function validate_country_input(req) {
-	country_query = 'SELECT country from countries WHERE country = ?';
-
-	console.log(country_query);
-
-	db.all(country_query, req.params.country, (err, rows) => {
-		if (err) {
-			console.log(err);
-			res.status(500).send('An error occurred here');
-		} else if (rows.length === 0) {
-			res.status(404).json([]);
-		} else {
-			city_query =
-				'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
-				visited_city_query +
-				' AND ( cities.would_visit IS ' +
-				would_visit_city_query +
-				')';
-			console.log(city_query);
-			db.all(city_query, req.params.country, (err, rows) => {
-				if (err) {
-					console.log(err);
-					res.status(500).send('An error occurred here');
-				} else {
-					res.json(rows);
-				}
-			});
-		}
-	});
-}
-
-function retrieve_array_cities(req, res) {
-	city_query =
-		'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
-		visited_city_query +
-		' AND ( cities.would_visit IS ' +
-		would_visit_city_query +
-		')';
-	console.log(city_query);
-	db.all(city_query, req.params.country, (err, rows) => {
-		if (err) {
-			console.log(err);
-			res.status(500).send('An error occurred here');
-		} else {
-			res.json(rows);
-		}
-	});
-}
-
-async function abc(req, res) {
-	//validates country properties to be boolean
-	validate_city_filters(req);
-	//function will check if user country input exists against database
-	validate_country_input(req);
-	//retrieve an array of cities from database
-	retrieve_array_cities(req, res);
-}
-
-function my_get_function(req, res) {
-	/* TODO: check if country actually exists 
-          check if country is blacklisted */
-
-	var visited_city_query = 'NOT NULL';
-	if (req.query.visited === 'true') {
-		visited_city_query = 'true';
-	} else if (req.query.visited === 'false') {
-		visited_city_query = 'false';
-	}
-
-	var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL';
-	if (req.query.would_visit === 'true') {
-		would_visit_city_query = 'true';
-	} else if (req.query.would_visit === 'false') {
-		would_visit_city_query = 'false';
-	}
-
-	country_query = 'SELECT country from countries WHERE country = ?';
-	console.log(country_query);
-	db.all(country_query, req.params.country, (err, rows) => {
-		if (err) {
-			console.log(err);
-			res.status(500).send('An error occurred here');
-		} else if (rows.length === 0) {
-			res.status(404).json([]);
-		} else {
-			city_query =
-				'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
-				visited_city_query +
-				' AND ( cities.would_visit IS ' +
-				would_visit_city_query +
-				')';
-			console.log(city_query);
-			db.all(city_query, req.params.country, (err, rows) => {
-				if (err) {
-					console.log(err);
-					res.status(500).send('An error occurred here');
-				} else {
-					res.json(rows);
-				}
-			});
-		}
-	});
-}
-
-app.get('/:country', abc);
-
 function validate(req) {
-	return new Promise((resolve, reject) => {
+	return new Promise((resolve) => {
 		console.log('validate request');
-		//TODO: validate visited property
 		if (req.query.visited !== undefined) {
 			validateBoolean(req.query.visited);
 		}
-		//TODO: validate would_visit
-		//TODO: validate blacklisted
-		resolve(true);
+
+		if (req.query.would_visit !== undefined) {
+			validateBoolean(req.query.would_visit);
+		}
+
+		if (req.query.blacklisted !== undefined) {
+			validateBoolean(req.query.blackisted);
+		}
+		resolve(req);
 		//can it be an empty param?
 	});
 }
 
 app.get('/v2/:country', (req, res, next) => {
-	validate(req)
-		.then((req) => {
-			console.log('database lookup');
-			//TODO: query db for /:country
-			//throw new Error('database lookup failed');
-			return { country: 'Croatia', cities: [ 'Rovinj', 'Porec' ] };
-		})
-		.then((data) => {
-			console.log('return response');
-			res.status(200).json(data);
-		})
-		.catch(next);
+	validate(req).then((req) => {
+		console.log(req);
+		var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL';
+		if (req.query.would_visit === 'true') {
+			would_visit_city_query = 'true';
+		} else if (req.query.would_visit === 'false') {
+			would_visit_city_query = 'false';
+		}
+		var visited_city_query = 'NOT NULL';
+		if (req.query.visited === 'true') {
+			visited_city_query = 'true';
+		} else if (req.query.visited === 'false') {
+			visited_city_query = 'false';
+		}
+
+		city_query =
+			'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
+			visited_city_query +
+			' AND ( cities.would_visit IS ' +
+			would_visit_city_query +
+			')';
+		console.log(city_query);
+		db
+			.all(city_query, req.params.country, (err, rows) => {
+				if (err) {
+					console.log(err);
+					res.status(500).send('An error occurred here');
+				} else {
+					res.json(rows);
+				}
+			})
+			.then((data) => {
+				console.log('return response');
+				res.status(200).json(data);
+			})
+			.catch(next);
+	});
 });
-/* app.get('/:country/:city', (req, res) => {
-  db.all('SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country= ? AND city = ?', req.params.country, req.params.city, 
-    (err, rows) => {
-      if(err) {
-        console.log(err)
-        res.status(500).send("An error occurred here")
-      }
-      else if (rows.length === 0) {
-        res.status(404).send("Country not found")
-      }
-      else {
-        res.json(rows)
-      }
-    }    
-  ) 
-}); */
 
 app.get('/:country/:city', (req, res) => {
 	/* TODO: check if country actually exists 
@@ -336,8 +219,6 @@ app.patch('/:country', (req, res) => {
 		return;
 	}
 
-	//TODO: how & what to validate about country
-
 	query = 'UPDATE countries SET visited = ?, would_visit = ?, blacklisted = ? WHERE country = ?';
 	db.run(query, visited, would_visit, blacklisted, req.params.country, (err) => {
 		if (err) {
@@ -379,17 +260,6 @@ app.patch('/:country/:city', (req, res) => {
 			res.status(202).send('accepted');
 		}
 	});
-});
-
-app.get('/uk', (req, res) => {
-	res.json({
-		name: 'England',
-		visited: true
-	});
-});
-
-app.get('/hello/:name', (req, res) => {
-	res.send('hello ' + req.params.name);
 });
 
 function isValidBoolean(value) {
