@@ -42,34 +42,35 @@ describe('Test get path /:country/:city', () => {
 	});
 });
 
-describe('GET /:country', () => {
+describe('GET /v2/:country', () => {
 	test('should be ok, status 200', async () => {
-		const response = await request(app).get('/Italy');
+		const response = await request(app).get('/v2/Italy');
 		expect(response.statusCode).toBe(200);
 	});
 
 	test('should respond with a non-empty list of cities', async () => {
-		const response = await request(app).get('/Italy');
+		const response = await request(app).get('/v2/Italy');
 		expect(response.body.length >= 1).toBe(true);
 	});
 
 	test('should respond with 404 for invalid country', async () => {
-		const response = await request(app).get('/Venus');
+		const response = await request(app).get('/v2/Venus');
 		expect(response.statusCode).toBe(404);
 	});
 
-	test('should respond with an empty list for invalid country', async () => {
-		const response = await request(app).get('/Venus');
-		expect(response.body.length === 0).toBe(true);
+	test('should respond with a JSON error message', async () => {
+		const response = await request(app).get('/v2/Venus');
+		expect(response.body.status).toBe(404);
+		expect(typeof response.body.message === 'string').toBe(true);
 	});
 
 	test("should respond with a 'visited' property", async () => {
-		const response = await request(app).get('/Italy');
+		const response = await request(app).get('/v2/Italy');
 		expect(typeof response.body.visited === 'boolean').toBe(true);
 	});
 
 	test("should respond with a 'would_visit' property", async () => {
-		const response = await request(app).get('/Italy');
+		const response = await request(app).get('/v2/Italy');
 		expect(typeof response.body.would_visit === 'boolean').toBe(true);
 	});
 	test('should respond with correctly matched country city pair', async () => {
