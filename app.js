@@ -128,44 +128,74 @@ function validate(req) {
 	});
 }
 
-app.get('/v2/:country', (req, res, next) => {
-	validate(req).then((req) => {
-		console.log(req);
-		var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL';
-		if (req.query.would_visit === 'true') {
-			would_visit_city_query = 'true';
-		} else if (req.query.would_visit === 'false') {
-			would_visit_city_query = 'false';
-		}
-		var visited_city_query = 'NOT NULL';
-		if (req.query.visited === 'true') {
-			visited_city_query = 'true';
-		} else if (req.query.visited === 'false') {
-			visited_city_query = 'false';
-		}
-
-		city_query =
-			'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
-			visited_city_query +
-			' AND ( cities.would_visit IS ' +
-			would_visit_city_query +
-			')';
-		console.log(city_query);
-		db
-			.all(city_query, req.params.country, (err, rows) => {
-				if (err) {
-					console.log(err);
-					res.status(500).send('An error occurred here');
-				} else {
-					res.json(rows);
-				}
-			})
-			.then((data) => {
-				console.log('return response');
-				res.status(200).json(data);
-			})
-			.catch(next);
+function query_db(query, country) {
+	console.log('query_db');
+	return new Promise((resolve) => {
+		db.all(query, country, (err, rows) => {
+			if (err) {
+				throw err;
+			} else {
+				resolve(rows);
+			}
+		});
 	});
+}
+
+function get_country(req) {
+	return new Promise((resolve, reject) => {
+		var query = 'SELECT country from countries WHERE country = ?';
+		var country = req.params.country;
+		db.get(query, country, (err, row) => {
+			if (err) {
+				throw err;
+			} else {
+				console.log(row);
+				if (row === undefined) {
+					var err = new Error(`Country given is not valid: ${country}`);
+					err.status = 404;
+					reject(err);
+				} else {
+					resolve(req);
+				}
+			}
+		});
+	});
+}
+
+app.get('/v2/:country', (req, res, next) => {
+	validate(req)
+		.then((req) => {
+			return get_country(req);
+		})
+		.then((req) => {
+			var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL';
+			if (req.query.would_visit === 'true') {
+				would_visit_city_query = 'true';
+			} else if (req.query.would_visit === 'false') {
+				would_visit_city_query = 'false';
+			}
+			var visited_city_query = 'NOT NULL';
+			if (req.query.visited === 'true') {
+				visited_city_query = 'true';
+			} else if (req.query.visited === 'false') {
+				visited_city_query = 'false';
+			}
+
+			city_query =
+				'SELECT city, country FROM cities JOIN countries ON cities.country_id = countries.id WHERE country = ? AND cities.visited IS ' +
+				visited_city_query +
+				' AND ( cities.would_visit IS ' +
+				would_visit_city_query +
+				')';
+			return { query: city_query, country: req.params.country };
+		})
+		.then((val) => {
+			return query_db(val.query, val.country);
+		})
+		.then((data) => {
+			res.status(200).json(data);
+		})
+		.catch(next);
 });
 
 app.get('/:country/:city', (req, res) => {
@@ -260,6 +290,16 @@ app.patch('/:country/:city', (req, res) => {
 			res.status(202).send('accepted');
 		}
 	});
+});
+
+app.use(function(err, req, res, next) {
+	let data = {
+		status: err.status || 500,
+		message: err.message
+	};
+	console.log(err);
+	res.status(err.status || 500);
+	res.json(data);
 });
 
 function isValidBoolean(value) {
