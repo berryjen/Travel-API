@@ -131,11 +131,12 @@ function validate(req) {
 function query_db(query, country) {
 	console.log('query_db');
 	return new Promise((resolve) => {
-		db.all(query, country, (err, rows) => {
+		db.all(query, country.name, (err, rows) => {
 			if (err) {
 				throw err;
 			} else {
-				resolve(rows);
+				country.cities = rows
+				resolve(country);
 			}
 		});
 	});
@@ -143,7 +144,7 @@ function query_db(query, country) {
 
 function get_country(req) {
 	return new Promise((resolve, reject) => {
-		var query = 'SELECT country from countries WHERE country = ?';
+		var query = 'SELECT country AS name, would_visit, visited from countries WHERE country = ?';
 		var country = req.params.country;
 		db.get(query, country, (err, row) => {
 			if (err) {
@@ -155,7 +156,11 @@ function get_country(req) {
 					err.status = 404;
 					reject(err);
 				} else {
-					resolve(req);
+					var data = {
+						"country": row,
+						"req": req
+					}
+					resolve(data);
 				}
 			}
 		});
@@ -167,7 +172,8 @@ app.get('/v2/:country', (req, res, next) => {
 		.then((req) => {
 			return get_country(req);
 		})
-		.then((req) => {
+		.then((data) => {
+			var req = data.req
 			var would_visit_city_query = 'NULL OR cities.would_visit IS NOT NULL';
 			if (req.query.would_visit === 'true') {
 				would_visit_city_query = 'true';
@@ -187,12 +193,13 @@ app.get('/v2/:country', (req, res, next) => {
 				' AND ( cities.would_visit IS ' +
 				would_visit_city_query +
 				')';
-			return { query: city_query, country: req.params.country };
+			return { query: city_query, country: data.country };
 		})
 		.then((val) => {
 			return query_db(val.query, val.country);
 		})
 		.then((data) => {
+			console.log(data);
 			res.status(200).json(data);
 		})
 		.catch(next);
@@ -280,7 +287,7 @@ app.patch('/:country/:city', (req, res) => {
 	query =
 		'UPDATE cities SET visited = ?, would_visit = ? WHERE cities.city = ? AND cities.country_id IN( SELECT id FROM countries WHERE country = ?);';
 
-	console.log(query);
+	console.log(query, visited, would_visit, req.params.city, req.params.country);
 
 	db.run(query, visited, would_visit, req.params.city, req.params.country, (err) => {
 		if (err) {
@@ -302,7 +309,7 @@ app.use(function(err, req, res, next) {
 	res.json(data);
 });
 
-function isValidBoolean(value) {
+function isValidBooleanString(value) {
 	if (value === 'true' || value === 'false') {
 		return true;
 	} else {
@@ -310,8 +317,16 @@ function isValidBoolean(value) {
 	}
 }
 
+function isValidBoolean(value) {
+	if (value === true || value === false) {
+		return true;
+	} else {
+		return false;
+	}
+}
+
 function validateBoolean(value) {
-	let isValidBoolean_result = isValidBoolean(value);
+	let isValidBoolean_result = isValidBooleanString(value);
 	if (isValidBoolean_result !== true) {
 		throw new SyntaxError(`Value given is not a valid Boolean: ${value}`);
 	}

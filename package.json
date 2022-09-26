@@ -22,6 +22,7 @@
     "supertest": "^6.2.4"
   },
   "scripts": {
-    "test": "jest"
+    "test": "jest --maxWorkers=1"
+
   }
 }

@@ -50,7 +50,7 @@ describe('GET /v2/:country', () => {
 
 	test('should respond with a non-empty list of cities', async () => {
 		const response = await request(app).get('/v2/Italy');
-		expect(response.body.length >= 1).toBe(true);
+		expect(response.body.cities.length >= 1).toBe(true);
 	});
 
 	test('should respond with 404 for invalid country', async () => {
@@ -66,12 +66,12 @@ describe('GET /v2/:country', () => {
 
 	test("should respond with a 'visited' property", async () => {
 		const response = await request(app).get('/v2/Italy');
-		expect(typeof response.body.visited === 'boolean').toBe(true);
+		expect(response.body).toHaveProperty('visited');
 	});
 
 	test("should respond with a 'would_visit' property", async () => {
 		const response = await request(app).get('/v2/Italy');
-		expect(typeof response.body.would_visit === 'boolean').toBe(true);
+		expect(response.body).toHaveProperty('would_visit');
 	});
 	test('should respond with correctly matched country city pair', async () => {
 		const response = await request(app).get('/Italy/Rome');
